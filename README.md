@@ -1,3 +1,3 @@
-# chisel-utilities-lib-template
+# Vutils
 
 Chisel lib for some useful utilities.
