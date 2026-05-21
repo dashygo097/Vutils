@@ -21,7 +21,8 @@ lazy val root = (project in file("."))
   .settings(
     name := "vutils",
     libraryDependencies ++= Seq(
-      "org.chipsalliance" %% "chisel" % chiselVersion,
+      "org.scalatest"     %% "scalatest" % "3.2.20" % Test,
+      "org.chipsalliance" %% "chisel"    % chiselVersion,
     ),
     addCompilerPlugin(
       "org.chipsalliance" % "chisel-plugin" % chiselVersion cross CrossVersion.full
