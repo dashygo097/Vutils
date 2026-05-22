@@ -23,8 +23,7 @@ object FixedPointOverflow {
 object FixedPoint extends NumObject {
   import FixedPointRounding._
 
-  def apply(): FixedPoint =
-    new FixedPoint(UnknownWidth, BinaryPoint())
+  def apply(): FixedPoint = new FixedPoint(UnknownWidth, BinaryPoint())
 
   def apply(width: Width, binaryPoint: BinaryPoint): FixedPoint =
     new FixedPoint(width, binaryPoint)
@@ -125,17 +124,11 @@ object FixedPoint extends NumObject {
     val maxBP = values.map(_.binaryPoint).reduce(_.max(_))
 
     val maxWidth = values
-      .map { value =>
-        recreateWidth(value.data) + (maxBP.get - value.binaryPoint.get)
-      }
+      .map(value => recreateWidth(value.data) + (maxBP.get - value.binaryPoint.get))
       .reduce(_.max(_))
 
     values.map { value =>
-      fromData(
-        maxBP,
-        rawAtBinaryPoint(value, maxBP, Truncate),
-        Some(maxWidth)
-      )
+      fromData(maxBP, rawAtBinaryPoint(value, maxBP, Truncate), Some(maxWidth))
     }.toSeq
   }
 
@@ -177,8 +170,7 @@ object FixedPoint extends NumObject {
       value
     } else {
       rounding match {
-        case Truncate =>
-          value >> amount
+        case Truncate => value >> amount
 
         case RoundTowardZero =>
           val bias = ((BigInt(1) << amount) - 1).S
@@ -280,11 +272,9 @@ sealed class FixedPoint private[datatype] (
     op(a.data, b.data)
   }
 
-  override def do_+(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
-    additiveOp(that, _ + _)
+  override def do_+(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = additiveOp(that, _ + _)
 
-  override def do_-(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
-    additiveOp(that, _ - _)
+  override def do_-(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = additiveOp(that, _ - _)
 
   override def do_*(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = {
     requireKnownBP()
@@ -296,136 +286,94 @@ sealed class FixedPoint private[datatype] (
     )
   }
 
-  override def do_/(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
-    div(that, binaryPoint)
+  override def do_/(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = div(that, binaryPoint)
 
   override def do_%(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = {
     val (a, b) = FixedPoint.dataAlignedPair(this, that)
     FixedPoint.fromData(a.binaryPoint, a.data % b.data)
   }
 
-  override def do_<(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool =
-    comparativeOp(that, _ < _)
+  override def do_<(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool = comparativeOp(that, _ < _)
 
-  override def do_<=(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool =
-    comparativeOp(that, _ <= _)
+  override def do_<=(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool = comparativeOp(that, _ <= _)
 
-  override def do_>(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool =
-    comparativeOp(that, _ > _)
+  override def do_>(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool = comparativeOp(that, _ > _)
 
-  override def do_>=(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool =
-    comparativeOp(that, _ >= _)
+  override def do_>=(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool = comparativeOp(that, _ >= _)
 
-  override def do_abs(implicit sourceInfo: SourceInfo): FixedPoint =
-    FixedPoint.fromData(binaryPoint, data.abs)
+  override def do_abs(implicit sourceInfo: SourceInfo): FixedPoint = FixedPoint.fromData(binaryPoint, data.abs)
 
-  def do_unary_-(implicit sourceInfo: SourceInfo): FixedPoint =
-    FixedPoint.fromData(binaryPoint, -data)
+  def do_unary_-(implicit sourceInfo: SourceInfo): FixedPoint = FixedPoint.fromData(binaryPoint, -data)
 
-  def unary_-(implicit sourceInfo: SourceInfo): FixedPoint =
-    do_unary_-
+  def unary_-(implicit sourceInfo: SourceInfo): FixedPoint = do_unary_-
 
-  def +%(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
-    additiveOp(that, _ +% _)
+  def +%(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = additiveOp(that, _ +% _)
 
-  def +&(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
-    additiveOp(that, _ +& _)
+  def +&(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = additiveOp(that, _ +& _)
 
-  def -%(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
-    additiveOp(that, _ -% _)
+  def -%(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = additiveOp(that, _ -% _)
 
-  def -&(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
-    additiveOp(that, _ -& _)
+  def -&(that: FixedPoint)(implicit sourceInfo: SourceInfo): FixedPoint = additiveOp(that, _ -& _)
 
-  def +(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this + literal(BigDecimal(that))
+  def +(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint = this + literal(BigDecimal(that))
 
-  def +(that: BigInt)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this + literal(BigDecimal(that))
+  def +(that: BigInt)(implicit sourceInfo: SourceInfo): FixedPoint = this + literal(BigDecimal(that))
 
-  def +(that: Double)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this + literal(BigDecimal.decimal(that))
+  def +(that: Double)(implicit sourceInfo: SourceInfo): FixedPoint = this + literal(BigDecimal.decimal(that))
 
-  def -(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this - literal(BigDecimal(that))
+  def -(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint = this - literal(BigDecimal(that))
 
-  def -(that: BigInt)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this - literal(BigDecimal(that))
+  def -(that: BigInt)(implicit sourceInfo: SourceInfo): FixedPoint = this - literal(BigDecimal(that))
 
-  def -(that: Double)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this - literal(BigDecimal.decimal(that))
+  def -(that: Double)(implicit sourceInfo: SourceInfo): FixedPoint = this - literal(BigDecimal.decimal(that))
 
-  def *(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this * literal(BigDecimal(that))
+  def *(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint = this * literal(BigDecimal(that))
 
-  def *(that: BigInt)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this * literal(BigDecimal(that))
+  def *(that: BigInt)(implicit sourceInfo: SourceInfo): FixedPoint = this * literal(BigDecimal(that))
 
-  def *(that: Double)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this * literal(BigDecimal.decimal(that))
+  def *(that: Double)(implicit sourceInfo: SourceInfo): FixedPoint = this * literal(BigDecimal.decimal(that))
 
-  def /(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this / literal(BigDecimal(that))
+  def /(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint = this / literal(BigDecimal(that))
 
-  def /(that: BigInt)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this / literal(BigDecimal(that))
+  def /(that: BigInt)(implicit sourceInfo: SourceInfo): FixedPoint = this / literal(BigDecimal(that))
 
-  def /(that: Double)(implicit sourceInfo: SourceInfo): FixedPoint =
-    this / literal(BigDecimal.decimal(that))
+  def /(that: Double)(implicit sourceInfo: SourceInfo): FixedPoint = this / literal(BigDecimal.decimal(that))
 
-  def ===(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool =
-    comparativeOp(that, _ === _)
+  def ===(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool = comparativeOp(that, _ === _)
 
-  def =/=(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool =
-    comparativeOp(that, _ =/= _)
+  def =/=(that: FixedPoint)(implicit sourceInfo: SourceInfo): Bool = comparativeOp(that, _ =/= _)
 
-  def ===(that: Int)(implicit sourceInfo: SourceInfo): Bool =
-    this === literal(BigDecimal(that))
+  def ===(that: Int)(implicit sourceInfo: SourceInfo): Bool = this === literal(BigDecimal(that))
 
-  def ===(that: Double)(implicit sourceInfo: SourceInfo): Bool =
-    this === literal(BigDecimal.decimal(that))
+  def ===(that: Double)(implicit sourceInfo: SourceInfo): Bool = this === literal(BigDecimal.decimal(that))
 
-  def =/=(that: Int)(implicit sourceInfo: SourceInfo): Bool =
-    this =/= literal(BigDecimal(that))
+  def =/=(that: Int)(implicit sourceInfo: SourceInfo): Bool = this =/= literal(BigDecimal(that))
 
-  def =/=(that: Double)(implicit sourceInfo: SourceInfo): Bool =
-    this =/= literal(BigDecimal.decimal(that))
+  def =/=(that: Double)(implicit sourceInfo: SourceInfo): Bool = this =/= literal(BigDecimal.decimal(that))
 
-  def <(that: Int)(implicit sourceInfo: SourceInfo): Bool =
-    this < literal(BigDecimal(that))
+  def <(that: Int)(implicit sourceInfo: SourceInfo): Bool = this < literal(BigDecimal(that))
 
-  def <(that: Double)(implicit sourceInfo: SourceInfo): Bool =
-    this < literal(BigDecimal.decimal(that))
+  def <(that: Double)(implicit sourceInfo: SourceInfo): Bool = this < literal(BigDecimal.decimal(that))
 
-  def <=(that: Int)(implicit sourceInfo: SourceInfo): Bool =
-    this <= literal(BigDecimal(that))
+  def <=(that: Int)(implicit sourceInfo: SourceInfo): Bool = this <= literal(BigDecimal(that))
 
-  def <=(that: Double)(implicit sourceInfo: SourceInfo): Bool =
-    this <= literal(BigDecimal.decimal(that))
+  def <=(that: Double)(implicit sourceInfo: SourceInfo): Bool = this <= literal(BigDecimal.decimal(that))
 
-  def >(that: Int)(implicit sourceInfo: SourceInfo): Bool =
-    this > literal(BigDecimal(that))
+  def >(that: Int)(implicit sourceInfo: SourceInfo): Bool = this > literal(BigDecimal(that))
 
-  def >(that: Double)(implicit sourceInfo: SourceInfo): Bool =
-    this > literal(BigDecimal.decimal(that))
+  def >(that: Double)(implicit sourceInfo: SourceInfo): Bool = this > literal(BigDecimal.decimal(that))
 
-  def >=(that: Int)(implicit sourceInfo: SourceInfo): Bool =
-    this >= literal(BigDecimal(that))
+  def >=(that: Int)(implicit sourceInfo: SourceInfo): Bool = this >= literal(BigDecimal(that))
 
-  def >=(that: Double)(implicit sourceInfo: SourceInfo): Bool =
-    this >= literal(BigDecimal.decimal(that))
+  def >=(that: Double)(implicit sourceInfo: SourceInfo): Bool = this >= literal(BigDecimal.decimal(that))
 
-  def <<(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint =
-    FixedPoint.fromData(binaryPoint, data << that)
+  def <<(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint = FixedPoint.fromData(binaryPoint, data << that)
 
-  def <<(that: UInt)(implicit sourceInfo: SourceInfo): FixedPoint =
-    FixedPoint.fromData(binaryPoint, data << that)
+  def <<(that: UInt)(implicit sourceInfo: SourceInfo): FixedPoint = FixedPoint.fromData(binaryPoint, data << that)
 
-  def >>(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint =
-    FixedPoint.fromData(binaryPoint, data >> that)
+  def >>(that: Int)(implicit sourceInfo: SourceInfo): FixedPoint = FixedPoint.fromData(binaryPoint, data >> that)
 
-  def >>(that: UInt)(implicit sourceInfo: SourceInfo): FixedPoint =
-    FixedPoint.fromData(binaryPoint, data >> that)
+  def >>(that: UInt)(implicit sourceInfo: SourceInfo): FixedPoint = FixedPoint.fromData(binaryPoint, data >> that)
 
   def div(
     that: FixedPoint,
@@ -437,39 +385,24 @@ sealed class FixedPoint private[datatype] (
 
     val shift = outBinaryPoint.get + that.binaryPoint.get - binaryPoint.get
 
-    val numerator =
-      if (shift >= 0) data << shift else data
+    val numerator = if (shift >= 0) data << shift else data
 
-    val denominator =
-      if (shift >= 0) that.data else that.data << -shift
+    val denominator = if (shift >= 0) that.data else that.data << -shift
 
     FixedPoint.fromData(outBinaryPoint, numerator / denominator)
   }
 
-  def withBinaryPoint(
-    that: BinaryPoint
-  )(implicit sourceInfo: SourceInfo): FixedPoint =
+  def withBinaryPoint(that: BinaryPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
     FixedPoint.fromData(that, data, Some(fixedWidth))
 
-  def asFixedPoint(
-    that: BinaryPoint
-  )(implicit sourceInfo: SourceInfo): FixedPoint =
+  def asFixedPoint(that: BinaryPoint)(implicit sourceInfo: SourceInfo): FixedPoint =
     withBinaryPoint(that)
 
-  def setBinaryPoint(
-    that: Int,
-    rounding: FixedPointRounding = Truncate
-  )(implicit sourceInfo: SourceInfo): FixedPoint =
+  def setBinaryPoint(that: Int, rounding: FixedPointRounding = Truncate)(implicit sourceInfo: SourceInfo): FixedPoint =
     setBinaryPoint(BinaryPoint(that), rounding)
 
-  def setBinaryPoint(
-    that: BinaryPoint,
-    rounding: FixedPointRounding
-  )(implicit sourceInfo: SourceInfo): FixedPoint =
-    FixedPoint.fromData(
-      that,
-      FixedPoint.rawAtBinaryPoint(this, that, rounding)
-    )
+  def setBinaryPoint(that: BinaryPoint, rounding: FixedPointRounding)(implicit sourceInfo: SourceInfo): FixedPoint =
+    FixedPoint.fromData(that, FixedPoint.rawAtBinaryPoint(this, that, rounding))
 
   def cast(
     width: Width,
@@ -481,16 +414,10 @@ sealed class FixedPoint private[datatype] (
     setBinaryPoint(binaryPoint, rounding).resize(width, overflow)
   }
 
-  def resize(
-    width: Width,
-    overflow: FixedPointOverflow = Wrap
-  )(implicit sourceInfo: SourceInfo): FixedPoint =
+  def resize(width: Width, overflow: FixedPointOverflow = Wrap)(implicit sourceInfo: SourceInfo): FixedPoint =
     overflow match {
-      case Wrap =>
-        FixedPoint.fromData(binaryPoint, data, Some(width))
-
-      case Saturate =>
-        saturate(width)
+      case Wrap     => FixedPoint.fromData(binaryPoint, data, Some(width))
+      case Saturate => saturate(width)
     }
 
   def saturate(width: Width)(implicit sourceInfo: SourceInfo): FixedPoint = {
@@ -500,11 +427,7 @@ sealed class FixedPoint private[datatype] (
     val min      = FixedPoint.minRaw(outWidth).S(width)
     val max      = FixedPoint.maxRaw(outWidth).S(width)
 
-    val clipped = Mux(
-      data > max,
-      max,
-      Mux(data < min, min, data)
-    )
+    val clipped = Mux(data > max, max, Mux(data < min, min, data))
 
     FixedPoint.fromData(binaryPoint, clipped, Some(width))
   }
@@ -516,11 +439,7 @@ sealed class FixedPoint private[datatype] (
     if (bp == 0) {
       this
     } else {
-      FixedPoint.fromData(
-        binaryPoint,
-        (data >> bp) << bp,
-        Some(fixedWidth)
-      )
+      FixedPoint.fromData(binaryPoint, (data >> bp) << bp, Some(fixedWidth))
     }
   }
 
@@ -532,11 +451,7 @@ sealed class FixedPoint private[datatype] (
       this
     } else {
       val almostOne = ((BigInt(1) << bp) - 1).S
-      FixedPoint.fromData(
-        binaryPoint,
-        ((data + almostOne) >> bp) << bp,
-        Some(fixedWidth)
-      )
+      FixedPoint.fromData(binaryPoint, ((data + almostOne) >> bp) << bp, Some(fixedWidth))
     }
   }
 
@@ -592,19 +507,13 @@ sealed class FixedPoint private[datatype] (
 
   final def asSInt: SInt = data.asSInt
 
-  def apply(idx: Int)(implicit sourceInfo: SourceInfo): Bool =
-    data(idx)
+  def apply(idx: Int)(implicit sourceInfo: SourceInfo): Bool = data(idx)
 
-  def apply(idx: UInt)(implicit sourceInfo: SourceInfo): Bool =
-    data(idx)
+  def apply(idx: UInt)(implicit sourceInfo: SourceInfo): Bool = data(idx)
 
-  def apply(high: Int, low: Int)(implicit sourceInfo: SourceInfo): UInt =
-    data(high, low)
+  def apply(high: Int, low: Int)(implicit sourceInfo: SourceInfo): UInt = data(high, low)
 
-  private def connectOp(
-    that: Data,
-    connect: (Data, Data) => Unit
-  )(implicit sourceInfo: SourceInfo): Unit =
+  private def connectOp(that: Data, connect: (Data, Data) => Unit)(implicit sourceInfo: SourceInfo): Unit =
     that match {
       case that: FixedPoint =>
         if (binaryPoint.known) {
@@ -624,11 +533,9 @@ sealed class FixedPoint private[datatype] (
         throw new ChiselException(s"cannot connect FixedPoint and $that")
     }
 
-  override def connect(that: Data)(implicit sourceInfo: SourceInfo): Unit =
-    connectOp(that, _ := _)
+  override def connect(that: Data)(implicit sourceInfo: SourceInfo): Unit = connectOp(that, _ := _)
 
-  override def bulkConnect(that: Data)(implicit sourceInfo: SourceInfo): Unit =
-    connectOp(that, _ <> _)
+  override def bulkConnect(that: Data)(implicit sourceInfo: SourceInfo): Unit = connectOp(that, _ <> _)
 
   override protected def _fromUInt(that: UInt)(implicit sourceInfo: SourceInfo): Data = {
     val out = Wire(this.cloneType)
@@ -650,8 +557,7 @@ sealed class FixedPoint private[datatype] (
       bp  <- binaryPoint.option
     } yield BigDecimal(raw) / BigDecimal(2).pow(bp)
 
-  def litToDoubleOption: Option[Double] =
-    litToBigDecimalOption.map(_.toDouble)
+  def litToDoubleOption: Option[Double] = litToBigDecimalOption.map(_.toDouble)
 
   override def toString: String =
     litToBigDecimalOption match {
